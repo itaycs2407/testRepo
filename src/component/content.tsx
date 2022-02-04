@@ -1,24 +1,24 @@
 import React from "react";
 import { User } from "../types/users";
 import styled from "@emotion/styled/macro";
+import { observer } from "mobx-react-lite";
+import store from "../store/store";
 
-interface Props {
-  users: Array<User>;
-}
-
-const Content: React.FC<Props> = ({ users }) => (
-  <>
-    {users.length > 0 ? (
-      <UsersContainer>
-        {users.map((user: User) => (
-          <Card key={user.id}>{user.name}</Card>
-        ))}
-      </UsersContainer>
-    ) : (
-      <span>No Content to show....</span>
-    )}
-  </>
-);
+const Content: React.FC = () => {
+  return (
+    <>
+      {store.getFilteredUsersData().length > 0 ? (
+        <UsersContainer>
+          {store.getFilteredUsersData().map((user: User) => (
+            <Card key={user.id}>{user.name}</Card>
+          ))}
+        </UsersContainer>
+      ) : (
+        <span>No Content to show....</span>
+      )}
+    </>
+  );
+};
 
 const UsersContainer = styled.div`
   padding: 0 50px;
@@ -40,4 +40,4 @@ const Card = styled.div`
   }
 `;
 
-export default Content;
+export default observer(Content);

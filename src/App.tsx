@@ -1,33 +1,31 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import styled from "@emotion/styled/macro";
 import { keyframes } from "@emotion/react";
 import { ToastContainer, toast } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
-import { User, UsersData } from "./types/users";
+import { User } from "./types/users";
 import Search from "./component/search";
 import Content from "./component/content";
+import store from "./store/store";
+import { observer } from "mobx-react-lite";
 
-function App() {
-  const [rawData, setRawData] = useState<UsersData>([]);
+const App = () => {
   const [searchValue, setSearchValue] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState<UsersData>([]);
   const [myModal, setMyModal] = useState<Array<string>>([]);
 
   useEffect(() => {
-    axios.get("./assets/users.json").then((res) => {
-      setRawData(res.data);
-      setFilteredUsers(res.data);
-    });
+    store.fetchRawData();
   }, []);
 
   useEffect(() => {
-    const filtered = rawData.filter((user: User) =>
-      user.name.toLowerCase().includes(searchValue)
-    );
+    const filtered = store.getUsersData().filter((user: User) => {
+      return user.name.toLowerCase().includes(searchValue);
+    });
+
     notify(filtered.length);
-    setFilteredUsers(filtered);
+
+    store.setFiltered(filtered);
   }, [searchValue]);
 
   const notify = (resultsNumber: number) => {
@@ -36,7 +34,6 @@ function App() {
     toast(`There are ${resultsNumber} results`);
   };
 
-  if (rawData.length === 0) return null;
   return (
     <>
       <ToastContainer
@@ -53,17 +50,17 @@ function App() {
       <Container>
         <Header>My Data</Header>
         <Search value={searchValue} setValue={setSearchValue} />
-        <Content users={filteredUsers} />
+        <Content />
       </Container>
 
       <ModalContainer>
-        {myModal.map((modal) => (
-          <ModalItem>{modal}</ModalItem>
+        {myModal.map((modal, index) => (
+          <ModalItem key={index}>{modal}</ModalItem>
         ))}
       </ModalContainer>
     </>
   );
-}
+};
 
 const Container = styled.div`
   height: 100vh;
@@ -106,4 +103,4 @@ const ModalItem = styled.div`
   animation: ${headerAnimation} 1s ease-in;
 `;
 
-export default App;
+export default observer(App);
