@@ -1,43 +1,84 @@
 import React from "react";
-import { User } from "../types/users";
+import { Address, Company, User } from "../types/users";
 import styled from "@emotion/styled/macro";
 import { observer } from "mobx-react-lite";
 import store from "../store/store";
 
 const Content: React.FC = () => {
+  const keys = ["", ...Object.keys(store.getFilteredUsersData()[0] || {})];
+
   return (
     <>
-      {store.getFilteredUsersData().length > 0 ? (
-        <UsersContainer>
-          {store.getFilteredUsersData().map((user: User) => (
-            <Card key={user.id}>{user.name}</Card>
-          ))}
-        </UsersContainer>
-      ) : (
-        <span>No Content to show....</span>
+      {keys.length > 0 && (
+        <Table>
+          <thead>
+            <tr>
+              {keys.map((title: string) => {
+                return <TableHead>{title}</TableHead>;
+              })}
+            </tr>
+          </thead>
+          <TableBody>
+            {store.getFilteredUsersData().map((user: User) => (
+              <TableRow key={user.id as string}>
+                <InputContainer>
+                  <input type="checkbox" />
+                </InputContainer>
+                {keys.map((k) => {
+                  if (k === "") return null;
+                  let name = user[k];
+                  if (k === "company") {
+                    name = (user[k] as Company).name;
+                  }
+                  if (k === "address") {
+                    name = (user[k] as Address).street;
+                  }
+                  return <TableCell>{name}</TableCell>;
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </>
   );
 };
-
-const UsersContainer = styled.div`
-  padding: 0 50px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`;
-
-const Card = styled.div`
-  background-color: white;
-  user-select: none;
-  box-shadow: 0 3px 20px rgba(0, 0, 0, 0.58);
-  border-radius: 14px;
-  padding: 20px;
+const TableRow = styled.tr`
   cursor: pointer;
+  text-align: left;
+
+  &:nth-child(odd) {
+    background-color: #61dafb;
+  }
 
   &:hover {
-    box-shadow: 0 3px 20px rgba(0, 0, 0, 0.18);
+    background-color: yellow;
   }
+`;
+
+const TableCell = styled.td`
+  padding: 13px;
+`;
+
+const InputContainer = styled(TableCell)`
+  padding: 30px 15px;
+  display: flex;
+  justify-content: center;
+`;
+
+const TableHead = styled.th`
+  text-align: left;
+  text-transform: capitalize;
+`;
+
+const TableBody = styled.tbody`
+  border-radius: 10px;
+  border: 3px solid red;
+`;
+
+const Table = styled.table`
+  border: 2px solid red;
+  border-collapse: collapse;
 `;
 
 export default observer(Content);

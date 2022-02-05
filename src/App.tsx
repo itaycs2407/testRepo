@@ -20,7 +20,7 @@ const App = () => {
 
   useEffect(() => {
     const filtered = store.getUsersData().filter((user: User) => {
-      return user.name.toLowerCase().includes(searchValue);
+      return (user.name as string).toLowerCase().includes(searchValue);
     });
 
     notify(filtered.length);
